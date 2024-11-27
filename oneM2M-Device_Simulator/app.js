@@ -429,7 +429,19 @@ function updateDevice(typeIndex,name,data){
 }
 
 function createContentInstance(name,typeIndex,fire){
-	var con = random(templates[typeIndex].min, templates[typeIndex].max).toString();
+	var con;
+    if (templates[typeIndex].type === "GPS Device") {
+        // create random latitude, longitude
+        var latitude = (Math.random() * 180 - 90).toFixed(6); // -90 ~ +90
+        var longitude = (Math.random() * 360 - 180).toFixed(6); // -180 ~ +180
+        con = {
+            latitude: latitude,
+            longitude: longitude
+        };
+        con = JSON.stringify(con); // JSON to string
+	} else {
+        con = random(templates[typeIndex].min, templates[typeIndex].max).toString();
+    }
 	var object = {
 		typeIndex: typeIndex,
 		type: templates[typeIndex].type,
