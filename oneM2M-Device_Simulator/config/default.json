@@ -80,6 +80,14 @@
             "min": null,
             "max": null,
             "icon": "images/icon-GPS.png"
+        },
+        {
+            "stream": "down",
+            "type": "locker",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "icon": "https://image.flaticon.com/icons/svg/216/216295.svg"
         }
     ]
 }
