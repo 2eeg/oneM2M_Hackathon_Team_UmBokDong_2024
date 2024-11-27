@@ -430,7 +430,7 @@ function updateDevice(typeIndex,name,data){
 
 function createContentInstance(name,typeIndex,fire){
 	var con;
-    if (templates[typeIndex].type === "GPS Device") {
+    if (templates[typeIndex].type === "GPS") {
         // create random latitude, longitude
         var latitude = (Math.random() * 180 - 90).toFixed(6); // -90 ~ +90
         var longitude = (Math.random() * 360 - 180).toFixed(6); // -180 ~ +180

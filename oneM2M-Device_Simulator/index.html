@@ -50,6 +50,13 @@ function displayDevices(){
             $('#cards').html("");
             for(var i=0;i<devices.length;i++){
                 var display ="";
+                var dataDisplay = devices[i].data;
+
+                if (devices[i].type === "GPS") {
+                    var gpsData = JSON.parse(devices[i].data);
+                    dataDisplay = "Lat: " + gpsData.latitude + ", Lon: " + gpsData.longitude;
+                }
+
                 if(devices[i].stream=="down"){
              // onclick="updateDevice(\''+devices[i].typeIndex+'\',\''+devices[i].name+'\',\''+val+'\')"
                     val=0;
