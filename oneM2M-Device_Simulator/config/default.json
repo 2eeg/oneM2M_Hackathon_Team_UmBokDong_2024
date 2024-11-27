@@ -76,6 +76,7 @@
             "stream": "up",
             "type": "GPS",
             "unit": "",
+            "freq": 10,
             "min": null,
             "max": null,
             "icon": "images/icon-GPS.png"
