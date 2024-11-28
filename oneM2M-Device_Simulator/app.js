@@ -58,8 +58,8 @@ app.post('/devices/:name', function (req, res) {
 })
 
 app.post('/devices', function (req, res) {
-	let typeIndex = req.query.type;
-	let name = req.query.name;
+	let typeIndex = req.query.type; 			//type 예: GPS, Lamp, buzzer
+	let name = req.query.name;					//name: 사용자가 설정한 가상 디바이스 이름
 	var object = {
 		typeIndex: typeIndex,
 		type: templates[typeIndex].type,
@@ -111,27 +111,28 @@ function createAE(name,typeIndex){
 		uri: cseURL + "/" + config.cse.name,
 		method: "POST",
 		headers: {
-			"X-M2M-Origin": "S"+name,
-			"X-M2M-RI": "req"+requestNr,
+			"X-M2M-Origin": "S"+name,  				//요청에 대한 식별 값(Unique Request Identifier)
+			"X-M2M-RI": "req"+requestNr,			//접근 권한 부여 대상자, ACP(Access Control Policy, 권한 제어) 기능에 사용
 			"Content-Type": "application/vnd.onem2m-res+json;ty=2"
 		},
-		json: { 
-			"m2m:ae":{
-				"rn":name,			
-				"api":"app.company.com",
-				"rr":false
+		json: { 							//body 부분
+			"m2m:ae":
+				{
+					"rn":name,							//사용자가 정한 기기 이름.
+					"api":"app.company.com",			//애플리케이션의 고유한 식별자(Application ID)
+					"rr":false							//Mobius로부터 오는 요청에 대한 수신 가능 여부(Request Reachability). 즉, 다른 AE나 oneM2M 서버로부터의 요청을 받을 수 있는 상태인지를 나타냄.
+				}
 			}
-		}
-	};
+		};
 
 	var rr="false";
 	var poa = "";
 	// console.log("##############");
 	// console.log(templates);
 	// console.log(templates[typeIndex]);
-	if(templates[typeIndex].stream=="down"){
+	if(templates[typeIndex].stream=="down"){			//stream이 down 일 때만 다른 AE로 부터 요청을 받을 수 있음.
 		options.json["m2m:ae"]["rr"] = true;
-		options.json["m2m:ae"] = Object.assign(options.json["m2m:ae"], {"poa":["http://" + config.app.ip + ":" + config.app.port + "/" + name]});
+		options.json["m2m:ae"] = Object.assign(options.json["m2m:ae"], {"poa":["http://" + config.app.ip + ":" + config.app.port + "/" + name]});// options.json["m2m:ae"]라는 객체에 새로운 속성 "poa"를 추가하거나 기존 "poa" 속성을 덮어씀 pointOfAccess
 		listen(name,typeIndex)
 	}
 
