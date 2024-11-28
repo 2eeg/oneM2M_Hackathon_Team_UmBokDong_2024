@@ -66,7 +66,7 @@
         },
         {
             "stream": "down",
-            "type": "buzzer",
+            "type": "Buzzer",
             "unit": "",
             "min": 0,
             "max": 1,
@@ -83,7 +83,7 @@
         },
         {
             "stream": "down",
-            "type": "locker",
+            "type": "Locker",
             "unit": "",
             "min": 0,
             "max": 1,
