@@ -443,8 +443,8 @@ function createContentInstance(name,typeIndex,fire){
             prevLongitude = parseFloat(prevGPSValue.longitude);
         } else {
             // Initialize to default values if no previous data
-			prevLatitude = Math.random() * 180 - 90;
-			prevLongitude = Math.random() * 360 - 180;
+			prevLatitude = templates[typeIndex].initlatitude;
+			prevLongitude = templates[typeIndex].initlogitude;
         }
 
         var maxdelta = templates[typeIndex].maxdelta; // in meters

@@ -79,6 +79,8 @@
             "freq": 5,
             "min": null,
             "max": null,
+            "initlatitude": 37.549186395087,
+            "initlogitude": 127.07505567644,
             "maxdelta": 10,
             "icon": "images/icon-GPS.png"
         },
