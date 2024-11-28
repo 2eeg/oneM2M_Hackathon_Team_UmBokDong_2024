@@ -432,13 +432,51 @@ function updateDevice(typeIndex,name,data){
 function createContentInstance(name,typeIndex,fire){
 	var con;
     if (templates[typeIndex].type === "GPS") {
-        // create random latitude, longitude
-        var latitude = (Math.random() * 180 - 90).toFixed(6); // -90 ~ +90
-        var longitude = (Math.random() * 360 - 180).toFixed(6); // -180 ~ +180
-        con = {
-            latitude: latitude,
-            longitude: longitude
-        };
+        // Retrieve previous GPS value from map.get(name).data
+        var prevGPSData = map.get(name).data;
+        var prevLatitude, prevLongitude;
+
+        // Check if previous GPS data exists
+        if (prevGPSData) {
+            var prevGPSValue = JSON.parse(prevGPSData);
+            prevLatitude = parseFloat(prevGPSValue.latitude);
+            prevLongitude = parseFloat(prevGPSValue.longitude);
+        } else {
+            // Initialize to default values if no previous data
+			prevLatitude = Math.random() * 180 - 90;
+			prevLongitude = Math.random() * 360 - 180;
+        }
+
+        var maxdelta = templates[typeIndex].maxdelta; // in meters
+
+        // Generate random angle in radians
+        var angle = Math.random() * 2 * Math.PI;
+
+        // Generate random distance within maxdelta using square root for uniform distribution
+        var u = Math.random();
+        var distance = maxdelta * Math.sqrt(u); // in meters
+
+        // Calculate deltaX and deltaY in meters
+        var deltaX = distance * Math.cos(angle);
+        var deltaY = distance * Math.sin(angle);
+
+        // Convert deltaX and deltaY to degrees
+        var deltaLatitude = deltaY / 111000; // Approximate meters per degree latitude
+        var deltaLongitude = deltaX / (111000 * Math.cos(prevLatitude * Math.PI / 180)); // Adjust for longitude
+
+        // Calculate new latitude and longitude
+        var latitude = prevLatitude + deltaLatitude;
+        var longitude = prevLongitude + deltaLongitude;
+
+        // Ensure latitude is between -90 and 90 degrees
+        if (latitude > 90) latitude = 90 - (latitude - 90);
+        if (latitude < -90) latitude = -90 - (latitude + 90);
+
+        // Ensure longitude is between -180 and 180 degrees
+        if (longitude > 180) longitude = -180 + (longitude - 180);
+        if (longitude < -180) longitude = 180 + (longitude + 180);
+
+        con = { latitude: latitude, longitude: longitude };
         con = JSON.stringify(con); // JSON to string
 	} else {
         con = random(templates[typeIndex].min, templates[typeIndex].max).toString();
