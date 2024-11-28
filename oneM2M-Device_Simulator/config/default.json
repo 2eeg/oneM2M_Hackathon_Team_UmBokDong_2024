@@ -88,6 +88,14 @@
             "min": 0,
             "max": 1,
             "icon": "images/icon-locker.png"
+        },
+        {
+            "stream": "down",
+            "type": "Collision",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "icon": "images/icon-collision.png"
         }
     ]
 }
