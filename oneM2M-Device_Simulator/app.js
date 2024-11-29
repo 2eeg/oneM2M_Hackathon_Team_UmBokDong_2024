@@ -183,9 +183,9 @@ function deleteAE(name){
 		options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
 	}
 	
-	console.log("");
 	console.log(options.method + " " + options.uri);
-	console.log(options.json);
+	console.log("");
+
 
 	requestNr += 1;
 	request(options, function (error, response, body) {
@@ -259,9 +259,9 @@ function createAccessControlPolicy(name,typeIndex){
 			}
 		};
 
-	console.log("");
 	console.log(options.method + " " + options.uri);
 	console.log(options.json);
+	console.log("");
 
 	if(cseRelease != "1") {
 		options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
@@ -305,9 +305,9 @@ function createDataContainer(name,typeIndex){
 
 	options.json["m2m:cnt"] = Object.assign(options.json["m2m:cnt"], acpi);
 	
-	console.log("");
 	console.log(options.method + " " + options.uri);
 	console.log(options.json);
+	console.log("");
 
 	if(cseRelease != "1") {
 		options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
@@ -357,9 +357,9 @@ function createCommandContainer(name,typeIndex){
 
 	options.json["m2m:cnt"] = Object.assign(options.json["m2m:cnt"], acpi);
 	
-	console.log("");
 	console.log(options.method + " " + options.uri);
 	console.log(options.json);
+	console.log("");
 
 	if(cseRelease != "1") {
 		options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
@@ -412,9 +412,9 @@ function updateDevice(typeIndex,name,data){
 			}
 		};
 	
-		console.log("");
 		console.log(options.method + " " + options.uri);
 		console.log(options.json);
+		console.log("");
 
 		if(cseRelease != "1") {
 			options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
@@ -517,9 +517,9 @@ function createContentInstance(name,typeIndex,fire){
 			}
 		};
 	
-		console.log("");
 		console.log(options.method + " " + options.uri);
 		console.log(options.json);
+		console.log("");
 
 		if(cseRelease != "1") {
 			options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
@@ -566,9 +566,9 @@ function createSubscription(name,typeIndex){
 		}
 	};
 
-	console.log("");
 	console.log(options.method + " " + options.uri);
 	console.log(options.json);
+	console.log("");
 
 	if(cseRelease != "1") {
 		options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
