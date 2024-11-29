@@ -183,6 +183,10 @@ function deleteAE(name){
 		options.headers = Object.assign(options.headers, {"X-M2M-RVI":cseRelease});
 	}
 	
+	console.log("");
+	console.log(options.method + " " + options.uri);
+	console.log(options.json);
+
 	requestNr += 1;
 	request(options, function (error, response, body) {
 		console.log("[RESPONSE]");
@@ -432,6 +436,10 @@ function updateDevice(typeIndex,name,data){
 function createContentInstance(name,typeIndex,fire){
 	var con;
     if (templates[typeIndex].type === "GPS") {
+		if(!(map.has(name))){
+			clearInterval(fire);
+			return;
+		}
         // Retrieve previous GPS value from map.get(name).data
         var prevGPSData = map.get(name).data;
         var prevLatitude, prevLongitude;
