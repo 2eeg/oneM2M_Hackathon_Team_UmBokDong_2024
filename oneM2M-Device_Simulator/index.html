@@ -117,8 +117,7 @@ function deleteDevice(name) {
 
 function createDevice() {
     var type = document.getElementById('type').value;
-    var name = document.getElementById('name').value;;
-
+    var name = document.getElementById('name').value;
     if (name == "") {
         alert("Name must be filled out");
         return false;
@@ -156,14 +155,14 @@ function updateDevice(typeIndex,name, id) {
 
 function makeEntireDevice() {
     var AE_name = document.getElementById('name_ae').value;
-    var sensors = ["_pres", "_led", "_buz", "_loc", "_gps"];
-    var indexes = [9, 5, 6, 8, 7];
+    var sensors = ["_pres", "_led", "_buz", "_loc", "_gps", ""];
+    var indexes = [9, 5, 6, 8, 7, 3];
     for (let index = 0; index < sensors.length; index++) {
-        createDevice(indexes[index], AE_name+sensors[index]);
+        createDevice2(indexes[index], AE_name+sensors[index]);
     }
 }
 
-function createDevice(type, name) {
+function createDevice2(type, name) {
     if (name == "") {
         alert("Name must be filled out");
         return false;
