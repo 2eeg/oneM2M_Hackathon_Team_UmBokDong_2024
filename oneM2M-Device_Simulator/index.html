@@ -52,7 +52,7 @@ function displayDevices(){
                 var display ="";
                 var dataDisplay = devices[i].data;
 
-                if (devices[i].type === "GPS") {
+                if (devices[i].type == "GPS") {
                     var gpsData = JSON.parse(devices[i].data);
                     dataDisplay = "Lat: " + gpsData.latitude + ", Lon: " + gpsData.longitude;
                 }
@@ -117,8 +117,7 @@ function deleteDevice(name) {
 
 function createDevice() {
     var type = document.getElementById('type').value;
-    var name = document.getElementById('name').value;;
-
+    var name = document.getElementById('name').value;
     if (name == "") {
         alert("Name must be filled out");
         return false;
@@ -154,6 +153,34 @@ function updateDevice(typeIndex,name, id) {
     }); 
 }
 
+function makeEntireDevice() {
+    var AE_name = document.getElementById('name_ae').value;
+    var sensors = ["_pres", "_led", "_buz", "_lock", "_gps", ""];
+    var indexes = [9, 5, 6, 8, 7, 3];
+    for (let index = 0; index < sensors.length; index++) {
+        createDevice2(indexes[index], AE_name+sensors[index]);
+    }
+}
+
+function createDevice2(type, name) {
+    if (name == "") {
+        alert("Name must be filled out");
+        return false;
+    }
+
+    $.ajax({ 
+        type : "POST", 
+        url : "devices?type="+type+"&name="+name,
+        success : function(body,code) { 
+            console.log(code);
+            console.log(body);
+        }, 
+        error : function(body,status,error) { 
+            console.log("error on creating "+name);
+        } 
+    }); 
+}
+
 </script>
     <div class="container col-sm-4">      
 
@@ -172,6 +199,15 @@ function updateDevice(typeIndex,name, id) {
                 <input  required="true" class="form-control" id="name" >
             </div>
             <button type="submit" class="btn btn-primary pull-right">Create new device</button>
+    
+        </form>
+        <!-- 추가된 form -->
+        <form name="myForm_2" onsubmit="return makeEntireDevice()" >
+            <div class="form-group">
+                <label for="name">Name_AE:</label>
+                <input  required="true" class="form-control" id="name_ae" >
+            </div>
+            <button type="submit" class="btn btn-primary pull-right">Create ALL devices</button>
     
         </form>
     </div>
