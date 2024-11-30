@@ -70,7 +70,7 @@
             "unit": "",
             "min": 0,
             "max": 1,
-            "icon": "https://image.flaticon.com/icons/svg/216/216295.svg"
+            "icon": "images/icon-buzzer.png"
         },
         {
             "stream": "up",
