@@ -41,11 +41,11 @@
         {
             "stream": "up",
             "type": "Power",
-            "unit": "Kw",
+            "unit": "",
             "min": 1000,
             "max": 2000,
             "freq": 10,
-            "icon": "images/icon-meter.png"
+            "icon": "images/icon-power.svg"
         },
         {
             "stream": "up",
@@ -62,7 +62,7 @@
             "unit": "",
             "min": 0,
             "max": 1,
-            "icon": "images/icon-light.png"
+            "icon": "images/icon-light.svg"
         },
         {
             "stream": "down",
@@ -70,7 +70,7 @@
             "unit": "",
             "min": 0,
             "max": 1,
-            "icon": "https://image.flaticon.com/icons/svg/216/216295.svg"
+            "icon": "images/icon-buzzer.svg"
         },
         {
             "stream": "up",
@@ -82,7 +82,7 @@
             "initlatitude": 37.549186395087,
             "initlogitude": 127.07505567644,
             "maxdelta": 10,
-            "icon": "images/icon-GPS.png"
+            "icon": "images/icon-GPS.svg"
         },
         {
             "stream": "down",
@@ -90,7 +90,7 @@
             "unit": "",
             "min": 0,
             "max": 1,
-            "icon": "images/icon-locker.png"
+            "icon": "images/icon-locker.svg"
         },
         {
             "stream": "down",
@@ -98,7 +98,7 @@
             "unit": "",
             "min": 0,
             "max": 1,
-            "icon": "images/icon-collision.png"
+            "icon": "images/icon-collision.svg"
         }
     ]
 }
