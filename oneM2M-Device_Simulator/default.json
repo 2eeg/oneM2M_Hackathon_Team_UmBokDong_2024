@@ -1,0 +1,104 @@
+{
+    "cse": {
+        "ip": "127.0.0.1",
+        "port": 7579,
+        "id": "Mobius2",
+        "name": "Mobius",
+        "release": "1",
+        "acp_required": false
+    },
+    "app": {
+        "ip": "127.0.0.1",
+        "port": 8369
+    },
+    "templates": [{
+            "stream": "up",
+            "type": "Temperature",
+            "unit": "°C",
+            "min": 18,
+            "max": 22,
+            "freq": 10,
+            "icon": "images/icon-thermo.png"
+        },
+        {
+            "stream": "up",
+            "type": "Humidity",
+            "unit": "%",
+            "min": 40,
+            "max": 50,
+            "freq": 10,
+            "icon": "images/icon-water.png"
+        },
+        {
+            "stream": "up",
+            "type": "Luminosity",
+            "unit": "Lux",
+            "min": 200,
+            "max": 500,
+            "freq": 5,
+            "icon": "images/icon-sun.png"
+        },
+        {
+            "stream": "up",
+            "type": "Power",
+            "unit": "",
+            "min": 1000,
+            "max": 2000,
+            "freq": 10,
+            "icon": "images/icon-power.svg"
+        },
+        {
+            "stream": "up",
+            "type": "Presence",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "freq": 10,
+            "icon": "images/icon-motion.jpg"
+        },
+        {
+            "stream": "down",
+            "type": "Lamp",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "icon": "images/icon-light.svg"
+        },
+        {
+            "stream": "down",
+            "type": "Buzzer",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "icon": "images/icon-buzzer.svg"
+        },
+        {
+            "stream": "up",
+            "type": "GPS",
+            "unit": "",
+            "freq": 5,
+            "min": null,
+            "max": null,
+            "initlatitude": 37.549186395087,
+            "initlogitude": 127.07505567644,
+            "maxdelta": 10,
+            "icon": "images/icon-GPS.svg"
+        },
+        {
+            "stream": "down",
+            "type": "Locker",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "icon": "images/icon-locker.svg"
+        },
+        {
+            "stream": "down",
+            "type": "Collision",
+            "unit": "",
+            "min": 0,
+            "max": 1,
+            "icon": "images/icon-collision.svg"
+        }
+    ]
+}

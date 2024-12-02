@@ -63,7 +63,7 @@ app.post('/devices', function (req, res) {
 	var object = {
 		typeIndex: typeIndex,
 		type: templates[typeIndex].type,
-		data: random(templates[typeIndex].min, templates[typeIndex].max),
+		data: 0,
 		icon: templates[typeIndex].icon,
 		unit:templates[typeIndex].unit,
 		stream:templates[typeIndex].stream
@@ -431,7 +431,10 @@ function updateDevice(typeIndex,name,data){
 
 function createContentInstance(name,typeIndex,fire){
 	var con;
-    if (templates[typeIndex].type === "GPS") {
+    if (templates[typeIndex].type == "GPS") {
+		if(!map.has(name)){
+			clearInterval(fire);
+		}
         // Retrieve previous GPS value from map.get(name).data
         var prevGPSData = map.get(name).data;
         var prevLatitude, prevLongitude;
@@ -478,7 +481,8 @@ function createContentInstance(name,typeIndex,fire){
 
         con = { latitude: latitude, longitude: longitude };
         con = JSON.stringify(con); // JSON to string
-	} else {
+	}
+	else{
         con = random(templates[typeIndex].min, templates[typeIndex].max).toString();
     }
 	var object = {
