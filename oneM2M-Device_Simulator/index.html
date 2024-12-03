@@ -14,6 +14,7 @@
     
 <script>
 var templates;
+var audio;
 
 $.ajax({ 
         type : "GET", 
@@ -55,6 +56,14 @@ function displayDevices(){
                 if (devices[i].type == "GPS") {
                     var gpsData = JSON.parse(devices[i].data);
                     dataDisplay = "Lat: " + gpsData.latitude + ", Lon: " + gpsData.longitude;
+                }
+                else if (devices[i].type == "Buzzer") {
+                    if(dataDisplay == 1){
+                        playBuzzerSound(dataDisplay);
+                    }
+                    else if(dataDisplay == 2){
+                        playBuzzerSound(dataDisplay);
+                    }
                 }
 
                 if(devices[i].stream=="down"){
@@ -137,15 +146,9 @@ function createDevice() {
         } 
     }); 
 }
-
+3
 function updateDevice(typeIndex,name, id) {
     var value = document.getElementById(id).value;
-    if(typeIndex == 6){// buzzer
-        playBuzzerSound(value);
-        if(value == 2){//buzzer will be triggered once
-            value = 0;
-        }
-    }
     if(typeIndex == 9){//pres
         if(value < 8){
             value = 0;
@@ -161,7 +164,6 @@ function updateDevice(typeIndex,name, id) {
             console.log(code);
             console.log(body);
             displayDevices();
-
         }, 
         error : function(body,status,error) { 
 
@@ -201,26 +203,25 @@ function playBuzzerSound(flag) {
         //buffzer is off
         return;
     }
-    // if(flag == 1){
-    //     //alert
-    //     var audio = new Audio('https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3');
-    //     //will changed to
-    //     //var audio = new Audio();
-    //     //audio.src = "alert.mp3";
-    //     audio.loop = true;
-    //     audio.volume = 0.5;
-    //     audio.play();
-    // }
-    // if(flag == 2){
-    //     //notification
-    //     var audio = new Audio('https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3');
-    //     //will changed to
-    //     //var audio = new Audio();
-    //     //audio.src = "alert.mp3";
-    //     audio.loop = false;
-    //     audio.volume = 0.5;
-    //     audio.play();
-    // }
+    if(flag == 1){
+        //alert
+        audio = new Audio();
+        audio.src = "audio/beep-beep-6151.mp3";
+        audio.loop = false;
+        audio.volume = 1;
+        audio.play();
+    }
+    if(flag == 2){
+        //notification
+        audio = new Audio();
+        audio.src = "audio/beep-beep-101391.mp3";
+        audio.loop = false;
+        audio.volume = 1;
+        audio.addEventListener("ended", function(){ 
+            updateDevice(6, "tmp_1_buz", 0);
+        });
+        audio.play();
+    }
 }
 
 </script>

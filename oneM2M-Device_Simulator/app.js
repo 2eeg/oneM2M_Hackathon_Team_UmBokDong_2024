@@ -63,7 +63,7 @@ app.post('/devices', function (req, res) {
 	var object = {
 		typeIndex: typeIndex,
 		type: templates[typeIndex].type,
-		data: 0,
+		data: templates[typeIndex].data,
 		icon: templates[typeIndex].icon,
 		unit:templates[typeIndex].unit,
 		stream:templates[typeIndex].stream
@@ -378,6 +378,9 @@ function createCommandContainer(name,typeIndex){
 
 
 function updateDevice(typeIndex,name,data){
+	if(!map.has(name)){
+		return;
+	}
 	var con = data;
 
 	var object = {
