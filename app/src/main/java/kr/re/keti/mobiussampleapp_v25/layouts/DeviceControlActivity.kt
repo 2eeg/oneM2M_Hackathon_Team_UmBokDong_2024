@@ -1,77 +1,65 @@
 package kr.re.keti.mobiussampleapp_v25.layouts
 
+import android.Manifest
 import android.animation.ObjectAnimator
+import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Location
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.LocationSource
+import com.google.android.gms.maps.LocationSource.OnLocationChangedListener
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import info.mqtt.android.service.MqttAndroidClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kr.re.keti.mobiussampleapp_v25.App
 import kr.re.keti.mobiussampleapp_v25.R
 import kr.re.keti.mobiussampleapp_v25.data.ContentInstanceObject
-import kr.re.keti.mobiussampleapp_v25.data.ContentSubscribeObject
-import kr.re.keti.mobiussampleapp_v25.database.RegisteredAE
 import kr.re.keti.mobiussampleapp_v25.database.RegisteredAEDatabase
 import kr.re.keti.mobiussampleapp_v25.databinding.ActivityDeviceControlBinding
 import kr.re.keti.mobiussampleapp_v25.layouts.MainActivity.Companion.ae
 import kr.re.keti.mobiussampleapp_v25.layouts.MainActivity.Companion.csebase
 import kr.re.keti.mobiussampleapp_v25.layouts.MainActivity.IReceived
-import kr.re.keti.mobiussampleapp_v25.utils.MqttClientRequest
-import kr.re.keti.mobiussampleapp_v25.utils.MqttClientRequestParser
 import kr.re.keti.mobiussampleapp_v25.utils.ParseElementXml
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.IMqttToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttException
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
-import java.lang.Thread.sleep
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import java.util.logging.Level
 import java.util.logging.Logger
 
 class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
     private var _binding: ActivityDeviceControlBinding? = null
     private val binding get() = _binding!!
-    private val mutableLiveData = MutableLiveData<Pair<Float, Float>>()
+    private val mutableLocationData = MutableLiveData<Pair<Double, Double>>()
 
     private var MQTT_Req_Topic = ""
     private var MQTT_Resp_Topic = ""
-
-    private var handler = Executors.newSingleThreadExecutor()
     private var isOpened = false
+    private val job = Job()
+    private val locationSource = DeviceLocationSource()
+    private val markers = mutableListOf<MarkerOptions>()
+
     private lateinit var deviceAEName: String
     private lateinit var db: RegisteredAEDatabase
     private lateinit var callback: OnBackPressedCallback
-    private val job = Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,14 +83,14 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
             isOpened = !isOpened
             if(!isOpened) {
                 binding.imageButton.setImageResource(R.drawable.ic_arrow_up)
-                ObjectAnimator.ofFloat(binding.deviceControlLayout, "translationY", (298f * Resources.getSystem().displayMetrics.density + 0.5f)).apply {
+                ObjectAnimator.ofFloat(binding.deviceControlLayout, "translationY", (346f * Resources.getSystem().displayMetrics.density + 0.5f)).apply {
                     duration = 1000
                     start()
                 }
             }
             else {
                 binding.imageButton.setImageResource(R.drawable.ic_arrow_down)
-                ObjectAnimator.ofFloat(binding.deviceControlLayout, "translationY", (10f * Resources.getSystem().displayMetrics.density + 0.5f)).apply {
+                ObjectAnimator.ofFloat(binding.deviceControlLayout, "translationY", (0f * Resources.getSystem().displayMetrics.density + 0.5f)).apply {
                     duration = 1000
                     start()
                 }
@@ -112,15 +100,13 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
             val req = ControlRequest(deviceAEName+"_led", "DATA", if (isChecked) "1" else "0")
             req.setReceiver(object : IReceived {
                 override fun getResponseBody(msg: String) {
-                    handler.execute {
-                        Log.d(TAG, "************** LED Light Control *************\r\n\r\n$msg")
-                        val pxml = ParseElementXml()
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val registeredAE = db.registeredAEDAO().get(deviceAEName)
-                            Log.d(TAG, "RegisteredAE: ${registeredAE.isLedTurnedOn}")
-                            registeredAE.isLedTurnedOn = pxml.GetElementXml(msg, "con") != "0"
-                            db.registeredAEDAO().update(registeredAE)
-                        }
+                    Log.d(TAG, "************** LED Light Control *************\r\n\r\n$msg")
+                    val pxml = ParseElementXml()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val registeredAE = db.registeredAEDAO().get(deviceAEName)
+                        Log.d(TAG, "RegisteredAE: ${registeredAE!!.isLedTurnedOn}")
+                        registeredAE.isLedTurnedOn = pxml.GetElementXml(msg, "con") != "0"
+                        db.registeredAEDAO().update(registeredAE)
                     }
                 }
             })
@@ -130,26 +116,61 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
             val req = ControlRequest(deviceAEName+"_lock", "DATA", if (isChecked) "1" else "0")
             req.setReceiver(object : IReceived {
                 override fun getResponseBody(msg: String) {
-                    handler.execute {
-                        Log.d(TAG, "************** Lock Control *************\r\n\r\n$msg")
-                        val pxml = ParseElementXml()
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val registeredAE = db.registeredAEDAO().get(deviceAEName)
-                            Log.d(TAG, "RegisteredAE: ${registeredAE.isLocked}")
-                            registeredAE.isLocked = pxml.GetElementXml(msg, "con") != "0"
-                            db.registeredAEDAO().update(registeredAE)
-                        }
+                    Log.d(TAG, "************** Lock Control *************\r\n\r\n$msg")
+                    val pxml = ParseElementXml()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val registeredAE = db.registeredAEDAO().get(deviceAEName)
+                        Log.d(TAG, "RegisteredAE: ${registeredAE!!.isLocked}")
+                        registeredAE.isLocked = pxml.GetElementXml(msg, "con") != "0"
+                        binding.lockSwitch.text = if(registeredAE.isLocked) "Locked" else "Unlocked"
+                        db.registeredAEDAO().update(registeredAE)
                     }
                 }
             })
             req.start()
         }
+        binding.buzSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val req = ControlRequest(deviceAEName+"_buz", "DATA", if (isChecked) "1" else "0")
+            req.setReceiver(object : IReceived {
+                override fun getResponseBody(msg: String) {
+                    Log.d(TAG, "************** Buzzer Control *************\r\n\r\n$msg")
+                    val pxml = ParseElementXml()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val registeredAE = db.registeredAEDAO().get(deviceAEName)
+                        Log.d(TAG, "RegisteredAE: ${registeredAE!!.isBuzTurnedOn}")
+                        registeredAE.isBuzTurnedOn = pxml.GetElementXml(msg, "con") != "0"
+                        db.registeredAEDAO().update(registeredAE)
+                    }
+                }
+            })
+            req.start()
+        }
+        // When location resource arrived this function activates
+        mutableLocationData.observe(this) {
+            val location = it
+            locationSource.updateLocation(location)
+            binding.mapView.getMapAsync { googleMap ->
+                val cameraPosition = googleMap.cameraPosition
+                googleMap.animateCamera(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition(
+                            LatLng(location.first, location.second),
+                            17f,
+                            cameraPosition.tilt,
+                            cameraPosition.bearing
+                        )
+                    )
+                )
+            }
+        }
 
+        // For retrieving resource content from room database
         CoroutineScope(Dispatchers.IO + job).launch{
             getDeviceStatus()
-            while(true){
+            while(true) {
                 getAnomalyDetection()
-                delay(10000)
+                getGPSLocation()
+                delay(8000)
             }
         }
         setContentView(binding.root)
@@ -169,7 +190,6 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-
         onBackPressedDispatcher.addCallback(this, callback)
     }
 
@@ -210,66 +230,97 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-        googleMap.addMarker(MarkerOptions().position(LatLng(37.654601, 127.060530)).title("Current Location"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(37.654601, 127.060530), 15F))
+        googleMap.setLocationSource(locationSource)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        googleMap.isMyLocationEnabled = true
     }
 
     // Retrieve Actuators status
     private suspend fun getDeviceStatus() = coroutineScope {
         val pxml = ParseElementXml()
-        var isLedOn = false
-        var isLocked = false
         val data = async { db.registeredAEDAO().get(deviceAEName) }
         val led = async {
+            var isLedOn = false
             val reqLed = RetrieveRequest(deviceAEName+"_led", "DATA")
             reqLed.setReceiver(object : IReceived {
                 override fun getResponseBody(msg: String) {
-                    handler.execute {
-                        isLedOn = pxml.GetElementXml(msg, "con") != "0"
-                    }
+                    isLedOn = pxml.GetElementXml(msg, "con") != "0"
                 }
             })
             reqLed.start(); reqLed.join()
+            isLedOn
+        }
+        val buz = async {
+            var isBuzTurnedOn = false
+            val reqBuz = RetrieveRequest(deviceAEName+"_buz", "DATA")
+            reqBuz.setReceiver(object : IReceived {
+                override fun getResponseBody(msg: String) {
+                    isBuzTurnedOn = pxml.GetElementXml(msg, "con") != "0"
+                }
+            })
+            reqBuz.start(); reqBuz.join()
+            isBuzTurnedOn
         }
         val lock = async {
+            var isLocked = false
             val reqLock = RetrieveRequest(deviceAEName+"_lock", "DATA")
             reqLock.setReceiver(object : IReceived {
                 override fun getResponseBody(msg: String) {
-                    handler.execute {
-                        isLocked = pxml.GetElementXml(msg, "con") != "0"
-                    }
+                    isLocked = pxml.GetElementXml(msg, "con") != "0"
                 }
             })
             reqLock.start(); reqLock.join()
+            isLocked
         }
 
         withContext(Dispatchers.Main){
             // Asynchronous Data Retrieval Process
             val registeredAE = data.await()
-            led.await()
-            lock.await()
+            val isLedOn = led.await()
+            val isBuzTurnedOn = buz.await()
+            val isLocked = lock.await()
 
             // Change UI
             binding.ledSwitch.isChecked = isLedOn
+            binding.buzSwitch.isChecked = isBuzTurnedOn
             binding.lockSwitch.isChecked = isLocked
             binding.textView2.text = if(isLocked) "Locked" else "Unlocked"
 
             // Update Database
-            registeredAE.isLedTurnedOn = isLedOn
+            registeredAE!!.isLedTurnedOn = isLedOn
             registeredAE.isLocked = isLocked
+            registeredAE.isBuzTurnedOn = isBuzTurnedOn
+            binding.lockSwitch.text = if(isLocked) "Locked" else "Unlocked"
             db.registeredAEDAO().update(registeredAE)
         }
     }
-
     // Retrieve Anomaly Detection State
     private suspend fun getAnomalyDetection() = coroutineScope {
         val data = async { db.registeredAEDAO().get(deviceAEName) }
 
         withContext(Dispatchers.Main) {
             val registeredAE = data.await()
-            Log.d(TAG, "Got Information from Database: ${registeredAE.applicationName} -> ${registeredAE.isTriggered}")
+            Log.d(TAG, "Got Information from Database: ${registeredAE!!.applicationName} -> ${registeredAE.isTriggered}")
 
             if(registeredAE.isTriggered) {
+                binding.mapView.getMapAsync {
+                    val location = App.detectedLocation
+                    val marker = MarkerOptions()
+                    if(location != null){
+                        marker.position(LatLng(location.first, location.second))
+                        marker.snippet("Location: ${String.format("%.3f",location.first)}, ${String.format("%.3f", location.second)}")
+                        marker.title("Anomaly Detected!")
+                        markers.add(marker)
+                        it.addMarker(marker)
+                    } else{
+                        Toast.makeText(this@DeviceControlActivity, "Anomaly is detected, but cannot find its location!",Toast.LENGTH_SHORT).show()
+                    }
+                }
                 binding.imageView3.setImageResource(R.drawable.icon_warning)
                 binding.textView2.text = "Anomaly Detected!"
             } else{
@@ -278,22 +329,41 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-
     // Retrieve GPS Location of device
     private suspend fun getGPSLocation() = coroutineScope{
-        val reqLocation = RetrieveRequest(deviceAEName+"_loc", "DATA")
+        val reqLocation = RetrieveRequest(deviceAEName+"_gps", "DATA")
         reqLocation.setReceiver(object : IReceived {
             override fun getResponseBody(msg: String) {
-                handler.execute{
-                    val pxml = ParseElementXml()
-                    //TODO: Get location data and invalidate map location info.
-                }
+                val pxml = ParseElementXml()
+                val latitude = pxml.GetElementXml(msg, "latitude").toDouble()
+                val longitude = pxml.GetElementXml(msg, "longitude").toDouble()
+                mutableLocationData.postValue(Pair(latitude, longitude))
             }
         })
         reqLocation.start()
+        // mutableLocationData.postValue(Pair(Math.random()+37, Math.random()+112))
     }
 
-    // --- Retrieve Actions ---
+    /* Set Location Source of GoogleMap */
+    internal inner class DeviceLocationSource: LocationSource{
+        private var listener: OnLocationChangedListener? = null
+
+        override fun activate(p0: OnLocationChangedListener) {
+            this.listener = p0
+        }
+
+        fun updateLocation(loc: Pair<Double, Double>){
+            val location = Location("Mobius")
+            location.latitude = loc.first
+            location.longitude = loc.second
+            location.accuracy = 50.0f
+            listener?.onLocationChanged(location)
+        }
+
+        override fun deactivate() {
+            listener = null
+        }
+    }
     /* Retrieve Sensor Data */
     internal inner class RetrieveRequest : Thread {
         private val LOG: Logger = Logger.getLogger(
@@ -349,9 +419,6 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-    // -----------------------
-
-    // --- Control Actions ---
     /* Request Control LED */
     internal inner class ControlRequest(serviceAEName: String, containerName: String, comm: String) : Thread() {
         private val LOG: Logger = Logger.getLogger(
@@ -416,7 +483,6 @@ class DeviceControlActivity: AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-    // ----------------------
 
     companion object{
         private const val TAG = "DEVICE_CONTROL_ACTIVITY"
