@@ -42,8 +42,8 @@
             "stream": "up",
             "type": "Power",
             "unit": "",
-            "min": 0,
-            "max": 0,
+            "min": 1000,
+            "max": 2000,
             "freq": 10,
             "icon": "images/icon-power.svg"
         },
@@ -52,7 +52,7 @@
             "type": "Presence",
             "unit": "",
             "min": 0,
-            "max": 0,
+            "max": 1,
             "freq": 10,
             "icon": "images/icon-motion.jpg"
         },
@@ -61,7 +61,7 @@
             "type": "Lamp",
             "unit": "",
             "min": 0,
-            "max": 0,
+            "max": 1,
             "icon": "images/icon-light.svg"
         },
         {
@@ -69,7 +69,7 @@
             "type": "Buzzer",
             "unit": "",
             "min": 0,
-            "max": 0,
+            "max": 1,
             "icon": "images/icon-buzzer.svg"
         },
         {
@@ -88,7 +88,7 @@
             "stream": "down",
             "type": "Locker",
             "unit": "",
-            "min": 1,
+            "min": 0,
             "max": 1,
             "icon": "images/icon-locker.svg"
         },
@@ -97,7 +97,7 @@
             "type": "Collision",
             "unit": "",
             "min": 0,
-            "max": 0,
+            "max": 1,
             "icon": "images/icon-collision.svg"
         }
     ]

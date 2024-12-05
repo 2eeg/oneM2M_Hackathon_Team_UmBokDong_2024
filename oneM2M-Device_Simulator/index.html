@@ -14,6 +14,7 @@
     
 <script>
 var templates;
+var audio;
 
 $.ajax({ 
         type : "GET", 
@@ -56,6 +57,14 @@ function displayDevices(){
                     var gpsData = JSON.parse(devices[i].data);
                     dataDisplay = "Lat: " + gpsData.latitude + ", Lon: " + gpsData.longitude;
                 }
+                else if (devices[i].type == "Buzzer") {
+                    if(dataDisplay == 1){
+                        playBuzzerSound(dataDisplay);
+                    }
+                    else if(dataDisplay == 2){
+                        playBuzzerSound(dataDisplay);
+                    }
+                }
 
                 if(devices[i].stream=="down"){
              // onclick="updateDevice(\''+devices[i].typeIndex+'\',\''+devices[i].name+'\',\''+val+'\')"
@@ -73,7 +82,9 @@ function displayDevices(){
                 $('#cards').append(
                     '<div class="col-sm-2">\
                         <div class="card text-center" style="width: 15rem;margin-bottom:30px">\
+                            <center>\
                             <img src="'+devices[i].icon+'"  alt="Avatar" style="width:100%">\
+                            </center>\
                             <div class="card-body">\
                                 <h1><span class="badge badge-success">'+ devices[i].data+" "+devices[i].unit+'</span></h1>'
                                 +display+'\
@@ -135,9 +146,17 @@ function createDevice() {
         } 
     }); 
 }
-
+3
 function updateDevice(typeIndex,name, id) {
     var value = document.getElementById(id).value;
+    if(typeIndex == 9){//pres
+        if(value < 8){
+            value = 0;
+        }
+        else{
+            value = 1;
+        }
+    }
     $.ajax({ 
         type : "POST", 
         url : "devices/"+name+"?typeIndex="+typeIndex+"&value="+value,
@@ -145,7 +164,6 @@ function updateDevice(typeIndex,name, id) {
             console.log(code);
             console.log(body);
             displayDevices();
-
         }, 
         error : function(body,status,error) { 
 
@@ -179,6 +197,31 @@ function createDevice2(type, name) {
             console.log("error on creating "+name);
         } 
     }); 
+}
+function playBuzzerSound(flag) {
+    if(flag == 0){
+        //buffzer is off
+        return;
+    }
+    if(flag == 1){
+        //alert
+        audio = new Audio();
+        audio.src = "audio/beep-beep-6151.mp3";
+        audio.loop = false;
+        audio.volume = 1;
+        audio.play();
+    }
+    if(flag == 2){
+        //notification
+        audio = new Audio();
+        audio.src = "audio/beep-beep-101391.mp3";
+        audio.loop = false;
+        audio.volume = 1;
+        audio.addEventListener("ended", function(){ 
+            updateDevice(6, "tmp_1_buz", 0);
+        });
+        audio.play();
+    }
 }
 
 </script>

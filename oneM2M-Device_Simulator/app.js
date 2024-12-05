@@ -63,7 +63,7 @@ app.post('/devices', function (req, res) {
 	var object = {
 		typeIndex: typeIndex,
 		type: templates[typeIndex].type,
-		data: random(templates[typeIndex].min, templates[typeIndex].max),
+		data: templates[typeIndex].data,
 		icon: templates[typeIndex].icon,
 		unit:templates[typeIndex].unit,
 		stream:templates[typeIndex].stream
@@ -382,6 +382,9 @@ function createCommandContainer(name,typeIndex){
 
 
 function updateDevice(typeIndex,name,data){
+	if(!map.has(name)){
+		return;
+	}
 	var con = data;
 
 	var object = {
@@ -486,7 +489,8 @@ function createContentInstance(name,typeIndex,fire){
 
         con = { latitude: latitude, longitude: longitude };
         con = JSON.stringify(con); // JSON to string
-	} else {
+	}
+	else{
         con = random(templates[typeIndex].min, templates[typeIndex].max).toString();
     }
 	var object = {
