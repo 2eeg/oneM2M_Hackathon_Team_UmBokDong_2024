@@ -55,7 +55,7 @@ function displayDevices(){
 
                 if (devices[i].type == "GPS") {
                     var gpsData = JSON.parse(devices[i].data);
-                    dataDisplay = "Lat: " + gpsData.latitude + ", Lon: " + gpsData.longitude;
+                    dataDisplay = gpsData.latitude.toFixed(5) + ", " + gpsData.longitude.toFixed(5);
                 }
                 else if (devices[i].type == "Buzzer") {
                     if(dataDisplay == 1){
@@ -86,7 +86,7 @@ function displayDevices(){
                             <img src="'+devices[i].icon+'"  alt="Avatar" style="width:100%">\
                             </center>\
                             <div class="card-body">\
-                                <h1><span class="badge badge-success">'+ devices[i].data+" "+devices[i].unit+'</span></h1>'
+                                <h1><span class="badge badge-success">'+ dataDisplay +" "+devices[i].unit+'</span></h1>'
                                 +display+'\
                                 <h4 class="font-weight-bold">'+ devices[i].type+'</h4>\
                                 <h5>'+ devices[i].name+'</h5>\
