@@ -8,7 +8,7 @@
 - This queries the co2 sensor value and controls the led actuator.
 
 - The **oneM2M-Application-AndroidSample** is developed based on open source [Android Studio](https://developer.android.com/studio/index.html) for oneM2M service application.
-
+for details: https://www.hackster.io/umbokdong/onem2m-hackathon-team-umbokdong-2024-82c171
 ## **[Dissemination](https://github.com/IoTKETI/oneM2M-Application-AndroidSample/wiki/)**
 - We prepare and upload oneM2M-Application-AndroidSample tutorial video into webinar series
 
